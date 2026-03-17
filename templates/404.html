@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* stack image and button */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #c8e2a2; /* optional background color */
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .not-found-img {
+            max-width: 90%;
+            max-height: 70%;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: #b0d17d; /* button color */
+            color: #ffffff;       /* text color */
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none; /* for <a> */
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #a0c46c; /* slightly darker on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- Local 404 image -->
+    <img class="not-found-img" src="/static/assets/imgs/404.png" alt="404 Not Found">
+
+    <!-- Back to Home button -->
+    <a href="/" class="back-btn">Back to Home</a>
+</body>
+</html>

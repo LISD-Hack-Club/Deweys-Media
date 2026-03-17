@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deweys Media | Marketplace</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/notification.css">
+  <link rel="stylesheet" href="/static/marketplace.css">
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img src="/static/assets/imgs/logo.png" class="logo-img" alt="Logo">
+    Deweys Media
+  </a>
+
+  <input type="text" class="search-bar" placeholder="Search...">
+
+  <div class="header-right">
+    <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" hidden>0</span>
+    </button>
+
+    <div class="notif-pop" id="notif-pop" hidden>
+      <div class="notif-head">
+        <strong>Notifications</strong>
+        <button class="mini-clear" id="notif-clear" type="button">Mark read</button>
+      </div>
+
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <a href="/logout" class="user-pill">
+      <img class="header-avatar" src="{{ header_avatar }}" alt="Me">
+      {{ session.username }}
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <aside class="sidebar-left">
+    <ul>
+      <li>
+        <a href="/" class="nav-link">
+          <img src="/static/assets/imgs/home.png" class="icon-page" alt="">
+          <span>Home</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/my_page" class="nav-link">
+          <img src="/static/assets/imgs/mypage.png" class="icon-page" alt="">
+          <span>My Page</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/friends" class="nav-link">
+          <img src="/static/assets/imgs/friend.png" class="icon-page" alt="">
+          <span>Friends</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/events" class="nav-link">
+          <img src="/static/assets/imgs/events.png" class="icon-page" alt="">
+          <span>Events</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/messages" class="nav-link">
+          <img src="/static/assets/imgs/messages.png" class="icon-page" alt="">
+          <span>Messages</span>
+        </a>
+      </li>
+      <li class="active-page">
+        <a href="/marketplace" class="nav-link">
+          <img src="/static/assets/imgs/marketplace.png" class="icon-page" alt="">
+          <span>Marketplace</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/settings" class="nav-link">
+          <img src="/static/assets/imgs/settings.png" class="icon-page" alt="">
+          <span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+  <main class="marketplace-main">
+    <div class="empty-state">Loading…</div>
+  </main>

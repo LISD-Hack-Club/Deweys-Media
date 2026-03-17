@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deweys Media - Login</title>
+  <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-top">
+      <img src="/static/assets/imgs/logo.png" class="logo" alt="Logo">
+      <div class="auth-title">
+        <h2>Welcome back</h2>
+        <p>Log in to Deweys Media</p>
+      </div>
+    </div>
+
+    <form action="/login" method="POST" class="auth-form">
+      <label class="field">
+        <span>Username</span>
+        <input type="text" name="username" placeholder="Your username" required>
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input type="password" name="password" placeholder="Your password" required>
+      </label>
+
+      <button class="btn" type="submit">Login</button>
+    </form>
+
+    <a href="/signup" class="switch-link">Don’t have an account? Sign Up</a>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          {% for message in messages %}
+            <div class="flash-item">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+  </div>
+</div>
+
+</body>
+</html>

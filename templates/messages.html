@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deweys Media | Messages</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/friends.css">
+  <link rel="stylesheet" href="/static/notification.css">
+  <link rel="stylesheet" href="/static/messages.css">
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img src="/static/assets/imgs/logo.png" class="logo-img" alt="Logo">
+    Deweys Media
+  </a>
+
+  <input type="text" class="search-bar" placeholder="Search...">
+
+  <div class="header-right">
+    <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" hidden>0</span>
+    </button>
+
+    <div class="notif-pop" id="notif-pop" hidden>
+      <div class="notif-head">
+        <strong>Notifications</strong>
+        <button class="mini-clear" id="notif-clear" type="button">Mark read</button>
+      </div>
+
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <a href="/logout" class="user-pill">
+      <img class="header-avatar" src="{{ header_avatar }}" alt="Me">
+      {{ session.username }}
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <aside class="sidebar-left">
+    <ul>
+      <li>
+        <a href="/" class="nav-link">
+          <img src="/static/assets/imgs/home.png" class="icon-page" alt="">
+          <span>Home</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/my_page" class="nav-link">
+          <img src="/static/assets/imgs/mypage.png" class="icon-page" alt="">
+          <span>My Page</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/friends" class="nav-link">
+          <img src="/static/assets/imgs/friend.png" class="icon-page" alt="">
+          <span>Friends</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/events" class="nav-link">
+          <img src="/static/assets/imgs/events.png" class="icon-page" alt="">
+          <span>Events</span>
+        </a>
+      </li>
+
+      <li class="active-page">
+        <a href="/messages" class="nav-link">
+          <img src="/static/assets/imgs/messages.png" class="icon-page" alt="">
+          <span>Messages</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/settings" class="nav-link">
+          <img src="/static/assets/imgs/settings.png" class="icon-page" alt="">
+          <span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="messages-main">
+
+    <section class="messages-sidebar">
+      <div class="messages-sidebar-top">
+        <div class="messages-title">
+          <h2>Messages</h2>
+        </div>
+
+        <input
+          type="text"
+          class="messages-search"
+          id="messagesSearch"
+          placeholder="Search friends..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="conversation-list" id="conversationList">
+        <div class="empty-state">Loading friends…</div>
+      </div>
+    </section>
+
+    <section class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-user">
+          <img
+            src="/static/assets/imgs/avatar_placeholder.png"
+            class="chat-user-avatar"
+            id="chatUserAvatar"
+            alt="User"
+          >
+
+          <div class="chat-user-text">
+            <div class="chat-user-name" id="chatUserName">Select a friend</div>
+            <div class="chat-user-status" id="chatUserStatus">Open a chat</div>
+          </div>
+        </div>
+
+        <div class="chat-actions">
+          <button class="chat-icon-btn" id="callBtn" type="button" title="Call">📞</button>
+          <button class="chat-icon-btn" id="videoBtn" type="button" title="Video">🎥</button>
+        </div>
+      </div>
+
+      <div class="chat-body" id="chatBody">
+        <div class="date-divider">Messages</div>
+      </div>
+
+      <div class="chat-input-wrap">
+        <form class="chat-form" id="chatForm">
+          <button type="button" class="attach-btn" id="attachBtn" title="Attach">＋</button>
+
+          <input
+            type="text"
+            class="chat-input"
+            id="chatInput"
+            placeholder="Type a message..."
+            autocomplete="off"
+          >
+
+          <button type="button" class="emoji-btn" id="emojiBtn" title="Emoji">😊</button>
+          <button type="submit" class="send-btn" title="Send">➤</button>
+
+          <input
+            type="file"
+            id="mediaInput"
+            hidden
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+          >
+        </form>
+
+        <div class="emoji-picker" id="emojiPicker" hidden>
+          <button type="button">😀</button>
+          <button type="button">😂</button>
+          <button type="button">😍</button>
+          <button type="button">😭</button>
+          <button type="button">😎</button>
+          <button type="button">🔥</button>
+          <button type="button">❤️</button>
+          <button type="button">👍</button>
+          <button type="button">🙏</button>
+          <button type="button">🎉</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="call-modal" id="callModal">
+  <div class="call-card">
+    <div class="call-top">
+      <h3 id="callTitle">Call</h3>
+      <button type="button" id="endCallBtn" class="end-call-btn">✖</button>
+    </div>
+
+    <div class="call-videos">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <div class="call-status" id="callStatus">Ready</div>
+  </div>
+</div>
+
+<div id="currentUserId" data-id="{{ session.user_id }}" hidden></div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="/static/notifications.js"></script>
+<script src="/static/messages.js"></script>
+</body>
+</html>

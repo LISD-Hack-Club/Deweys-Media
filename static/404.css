@@ -1,0 +1,34 @@
+body {
+            display: flex;
+            flex-direction: column; /* stack image and button */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #c8e2a2; /* optional background color */
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .not-found-img {
+            max-width: 90%;
+            max-height: 70%;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: #b0d17d; /* button color */
+            color: #ffffff;       /* text color */
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none; /* for <a> */
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #a0c46c; /* slightly darker on hover */
+        }

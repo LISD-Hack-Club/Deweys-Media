@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deweys Media | Events</title>
+
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/notification.css" />
+  <link rel="stylesheet" href="/static/events.css" />
+   <link rel="stylesheet" href="/static/custom-cursor.css" />
+</head>
+<body>
+<header>
+  <a href="/" class="logo">
+    <img src="/static/assets/imgs/logo.png" class="logo-img" alt="Logo" />
+    Deweys Media
+  </a>
+
+  <input type="text" class="search-bar" placeholder="Search..." />
+
+  <div class="header-right">
+    <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" hidden>0</span>
+    </button>
+
+    <div class="notif-pop" id="notif-pop" hidden>
+      <div class="notif-head">
+        <strong>Notifications</strong>
+        <button class="mini-clear" id="notif-clear" type="button">Mark read</button>
+      </div>
+
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <a href="/logout" class="user-pill">
+      <img class="header-avatar" src="{{ header_avatar }}" alt="Me" />
+      {{ session.username }}
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <aside class="sidebar-left">
+    <ul>
+      <li>
+        <a href="/" class="nav-link">
+          <img src="/static/assets/imgs/home.png" class="icon-page" alt="" />
+          <span>Home</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/my_page" class="nav-link">
+          <img src="/static/assets/imgs/mypage.png" class="icon-page" alt="" />
+          <span>My Page</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/friends" class="nav-link">
+          <img src="/static/assets/imgs/friend.png" class="icon-page" alt="" />
+          <span>Friends</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/events" class="nav-link active-page">
+          <img src="/static/assets/imgs/events.png" class="icon-page" alt="" />
+          <span>Events</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/messages" class="nav-link">
+          <img src="/static/assets/imgs/messages.png" class="icon-page" alt="" />
+          <span>Messages</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/settings" class="nav-link">
+          <img src="/static/assets/imgs/settings.png" class="icon-page" alt="" />
+          <span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="events-main">
+
+    <section class="events-center">
+
+      <div class="calendar-card">
+
+        <div class="cal-top">
+          <button class="cal-arrow" id="prevMonth" type="button">◀</button>
+
+          <div class="cal-title">
+            <div class="cal-year" id="calYear">2026</div>
+            <div class="cal-month" id="calMonth">February</div>
+          </div>
+
+          <button class="cal-arrow" id="nextMonth" type="button">▶</button>
+        </div>
+
+        <div class="month-banner">
+          <img id="monthBanner" src="" alt="Month banner" />
+        </div>
+
+        <div class="dow-row">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="event-view" id="eventView" hidden></div>
+
+    </section>
+
+    <aside class="events-right">
+      <div class="right-card">
+        <div class="right-card-title">Events</div>
+
+        <button class="right-btn primary" id="createEventBtn" type="button">+ Create Event</button>
+        <button class="right-btn" type="button" id="allMyEventsBtn">All My Events</button>
+        <button class="right-btn" id="discoverBtn" type="button">Discover Events Near You</button>
+      </div>
+    </aside>
+
+  </main>
+
+</div>
+
+<!-- CREATE EVENT MODAL -->
+<div class="frog-modal" id="createEventModal" hidden>
+  <div class="frog-modal-card wide">
+    <div class="frog-modal-header">
+      <div class="frog-modal-title">Create Event</div>
+      <button class="frog-x" id="closeCreateEvent" type="button">✕</button>
+    </div>
+
+    <form id="createEventForm" enctype="multipart/form-data" style="padding:14px;">
+      <input class="frog-textarea" name="title" placeholder="Event title" required />
+
+      <textarea
+        class="frog-textarea"
+        name="description"
+        placeholder="Event description"
+        style="margin-top:10px;height:90px;"
+      ></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <input class="date" type="date" name="date" required />
+        <input class="time" type="time" name="start_time" required />
+      </div>
+
+      <input
+        class="frog-textarea"
+        name="location"
+        placeholder="Location"
+        style="margin-top:10px;"
+      />
+
+      <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+        <label style="font-weight:900;">Visibility</label>
+        <select name="visibility" style="flex:1; padding:10px; border-radius:14px;">
+          <option value="public">Everyone</option>
+          <option value="friends">Friends only</option>
+          <option value="private">Private</option>
+        </select>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+        <label style="font-weight:900;">Event Category</label>
+        <select name="theme" style="flex:1; padding:10px; border-radius:14px;">
+          <option value="">None</option>
+          <option value="birthday">Birthday</option>
+          <option value="wedding">Wedding</option>
+          <option value="prom">Prom</option>
+          <option value="concert">Concert</option>
+          <option value="church">Church</option>
+          <option value="random">Random</option>
+        </select>
+      </div>
+
+      <div class="file-input" style="margin-top:10px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Banner photo</label>
+        <input type="file" name="banner" accept="image/*" />
+      </div>
+
+      <div class="frog-modal-actions" style="margin-top:12px;">
+        <button type="submit" class="btn">Create Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EVENT POPUP MODAL -->
+<div class="frog-modal" id="eventPopupModal" hidden>
+  <div class="frog-modal-card wide" id="eventPopupCard">
+
+    <div class="frog-modal-header">
+      <div>
+        <div class="frog-modal-title" id="eventPopTitle">Event</div>
+        <div class="event-pop-date" id="eventPopDateLine"></div>
+      </div>
+      <button class="frog-x" id="closeEventPopup" type="button">✕</button>
+    </div>
+
+    <div class="event-pop-body">
+
+      <div class="event-pop-banner" id="eventPopBanner" style="display:none;">
+        <img id="eventPopBannerImg" src="" alt="" />
+      </div>
+
+      <div class="event-badges" id="eventBadges"></div>
+
+      <div class="event-kv">
+        <div class="kv-box">
+          <div class="kv-label">Location</div>
+          <div class="kv-value" id="kvLoc">—</div>
+        </div>
+
+        <div class="kv-box">
+          <div class="kv-label">Date</div>
+          <div class="kv-value" id="kvDate">—</div>
+        </div>
+
+        <div class="kv-box">
+          <div class="kv-label">Starts</div>
+          <div class="kv-value" id="kvStart">—</div>
+        </div>
+
+        <div class="kv-box">
+          <div class="kv-label">Ends</div>
+          <div class="kv-value" id="kvEnd">—</div>
+        </div>
+      </div>
+
+      <div class="event-actions">
+        <button class="right-btn small" id="inviteBtn" type="button" style="display:none;">➕ Invite</button>
+
+        <div class="rsvp-wrap" id="rsvpWrap" style="display:none;">
+          <div class="rsvp-label">RSVP</div>
+          <select class="rsvp-select" id="rsvpSelect">
+            <option value="yes">Yes!</option>
+            <option value="maybe">Maybe</option>
+            <option value="no">Not going</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="event-desc" id="eventPopDesc">No description.</div>
+
+      <div class="event-composer" id="hostComposer" style="display:none;">
+        <div class="composer-top">
+          <div class="composer-title">Post an update</div>
+          <div class="composer-hint">Only the host can post</div>
+        </div>
+
+        <textarea class="composer-text" id="updateText" placeholder="Type an update..."></textarea>
+
+        <div class="composer-actions">
+          <label class="composer-file">
+            📷 Add photo
+            <input type="file" id="updatePhoto" accept="image/*" style="display:none;">
+          </label>
+
+          <button class="composer-btn" id="postUpdateBtn" type="button">Post</button>
+        </div>
+
+        <div class="composer-preview" id="photoPreview" style="display:none;">
+          <img id="photoPreviewImg" src="" alt="">
+          <button class="mini-x" id="removePreview" type="button">✕</button>
+        </div>
+
+        <div style="margin-top:10px; font-weight:900; font-size:12px; color:var(--muted);" id="hostMsg"></div>
+      </div>
+
+      <div class="event-updates">
+        <div class="updates-title">Updates</div>
+        <div class="updates-list" id="updatesList">
+          <div class="empty-updates">No updates yet.</div>
+        </div>
+      </div>
+
+      <div class="guest-list-card">
+        <div class="guest-list-head">
+          <div class="guest-list-title">Invited Guests</div>
+          <div class="guest-list-count" id="guestListCount">0</div>
+        </div>
+
+        <div class="guest-list" id="guestList">
+          <div class="empty-updates">No invited guests yet.</div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- INVITE FRIENDS MODAL -->
+<div class="frog-modal" id="inviteFriendsModal" hidden>
+  <div class="frog-modal-card wide">
+    <div class="frog-modal-header">
+      <div>
+        <div class="frog-modal-title">Invite Friends</div>
+        <div class="event-pop-date" id="inviteModalSub">Choose friends to invite</div>
+      </div>
+      <button class="frog-x" id="closeInviteFriends" type="button">✕</button>
+    </div>
+
+    <div style="padding:14px;">
+      <input
+        type="text"
+        id="inviteSearch"
+        class="frog-textarea"
+        placeholder="Search your friends..."
+        style="height:auto; min-height:unset;"
+      >
+
+      <div class="invite-list-wrap" style="margin-top:12px;">
+        <div class="invite-list" id="inviteFriendsList">
+          <div class="empty-state">Loading friends…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALL MY EVENTS MODAL -->
+<div class="frog-modal" id="allMyEventsModal" hidden>
+  <div class="frog-modal-card wide all-events-card">
+    <div class="frog-modal-header">
+      <div>
+        <div class="frog-modal-title">All My Events</div>
+        <div class="event-pop-date">View your hosted, invited, and RSVP'd events</div>
+      </div>
+      <button class="frog-x" id="closeAllMyEvents" type="button">✕</button>
+    </div>
+
+    <div class="all-events-body">
+
+      <div class="all-events-tabs" id="allEventsTabs">
+        <button class="all-events-tab active" type="button" data-bucket="hosted">Hosted Events</button>
+        <button class="all-events-tab" type="button" data-bucket="invited">Invited To</button>
+        <button class="all-events-tab" type="button" data-bucket="going">RSVP / Going</button>
+      </div>
+
+      <div class="all-events-tabs" style="margin-top:10px;">
+        <button class="all-events-tab active" type="button" data-category="all">All</button>
+        <button class="all-events-tab" type="button" data-category="birthday">Birthday</button>
+        <button class="all-events-tab" type="button" data-category="wedding">Wedding</button>
+        <button class="all-events-tab" type="button" data-category="prom">Prom</button>
+        <button class="all-events-tab" type="button" data-category="concert">Concert</button>
+        <button class="all-events-tab" type="button" data-category="church">Church</button>
+        <button class="all-events-tab" type="button" data-category="other">Other</button>
+      </div>
+
+      <div class="all-events-grid" id="allEventsGrid">
+        <div class="empty-updates">Loading events…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISCOVER EVENTS MODAL -->
+<div class="frog-modal" id="discoverEventsModal" hidden>
+  <div class="frog-modal-card wide all-events-card">
+    <div class="frog-modal-header">
+      <div>
+        <div class="frog-modal-title">Discover Events Near You</div>
+        <div class="event-pop-date">Public events you can join</div>
+      </div>
+      <button class="frog-x" id="closeDiscoverEvents" type="button">✕</button>
+    </div>
+
+    <div class="all-events-body">
+      <div class="all-events-grid" id="discoverEventsGrid">
+        <div class="empty-updates">Loading events…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/events.js"></script>
+<script src="/static/notifications.js"></script>
+<script src="cursor.js"></script>
+</body>
+</html>
