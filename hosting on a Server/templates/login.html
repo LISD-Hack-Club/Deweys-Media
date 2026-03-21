@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deweys Media - Login</title>
+
+  <script>
+    (() => {
+      const darkMode = localStorage.getItem("darkMode");
+      if (darkMode === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/notification.css">
+  <link rel="stylesheet" href="/static/messages.css">
+  <link rel="stylesheet" href="/static/settings.css">
+  <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-top">
+      <img src="/static/assets/imgs/logo.png" class="logo" alt="Logo">
+      <div class="auth-title">
+        <h2>Welcome back</h2>
+        <p>Log in to Deweys Media</p>
+      </div>
+    </div>
+
+    <form action="/login" method="POST" class="auth-form">
+      <label class="field">
+        <span>Email or Username</span>
+        <input type="text" name="identifier" placeholder="Enter email or username" required>
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input type="password" name="password" placeholder="Your password" required>
+      </label>
+
+      <button class="btn" type="submit">Login</button>
+    </form>
+
+    <div class="auth-links">
+      <button type="button" class="forgot-link" id="openForgotModal">Forgot Password?</button>
+      <a href="/signup" class="switch-link">Don’t have an account? Sign Up</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          {% for message in messages %}
+            <div class="flash-item">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="fp-modal" id="forgotModal">
+  <div class="fp-modal-card">
+    <button class="fp-close" id="closeForgotModal">&times;</button>
+
+    <!-- STEP 1 -->
+    <div class="fp-step active" id="step-email">
+      <h3>Reset Password</h3>
+      <p>Enter your email and we’ll send you a 6-digit code.</p>
+
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="resetEmail" placeholder="Enter your email">
+      </label>
+
+      <button class="btn" id="sendCodeBtn" type="button">Send Code</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="fp-step" id="step-code">
+      <h3>Enter Code</h3>
+      <p>Check your email and enter the 6-digit code. It expires in 5 minutes.</p>
+
+      <label class="field">
+        <span>6-Digit Code</span>
+        <input type="text" id="resetCode" maxlength="6" placeholder="123456">
+      </label>
+
+      <button class="btn" id="verifyCodeBtn" type="button">Verify Code</button>
+      <button class="btn btn-secondary" id="backToEmailBtn" type="button">Back</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="fp-step" id="step-password">
+      <h3>Set New Password</h3>
+      <p>Enter your new password below.</p>
+
+      <label class="field">
+        <span>New Password</span>
+        <input type="password" id="newPassword" placeholder="New password">
+      </label>
+
+      <label class="field">
+        <span>Confirm Password</span>
+        <input type="password" id="confirmPassword" placeholder="Confirm password">
+      </label>
+
+      <button class="btn" id="resetPasswordBtn" type="button">Update Password</button>
+    </div>
+
+    <div class="fp-status" id="fpStatus"></div>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

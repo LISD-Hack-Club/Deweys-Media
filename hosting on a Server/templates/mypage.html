@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deweys Media • {{ user.username }}</title>
+  <script>
+    (() => {
+      const darkMode = localStorage.getItem("darkMode");
+      if (darkMode === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/notification.css">
+  <link rel="stylesheet" href="/static/messages.css">
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img src="/static/assets/imgs/logo.png" class="logo-img" alt="Logo">
+    Deweys Media
+  </a>
+
+  <input type="text" class="search-bar" placeholder="Search...">
+
+  <div class="header-right">
+    <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" hidden>0</span>
+    </button>
+
+    <div class="notif-pop" id="notif-pop" hidden>
+      <div class="notif-head">
+        <strong>Notifications</strong>
+        <button class="mini-clear" id="notif-clear" type="button">Mark read</button>
+      </div>
+
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <a href="/logout" class="user-pill">
+      <img class="header-avatar" src="{{ header_avatar }}" alt="Me">
+      {{ session.username }}
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <aside class="sidebar-left">
+    <ul>
+      <li>
+        <a href="/" class="nav-link">
+          <img src="/static/assets/imgs/home.png" class="icon-page" alt="">
+          <span>Home</span>
+        </a>
+      </li>
+
+      <li class="active-page">
+        <a href="/my_page" class="nav-link">
+          <img src="/static/assets/imgs/mypage.png" class="icon-page" alt="">
+          <span>My Page</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/friends" class="nav-link">
+          <img src="/static/assets/imgs/friend.png" class="icon-page" alt="">
+          <span>Friends</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/events" class="nav-link">
+          <img src="/static/assets/imgs/events.png" class="icon-page" alt="">
+          <span>Events</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/messages" class="nav-link">
+          <img src="/static/assets/imgs/messages.png" class="icon-page" alt="">
+          <span>Messages</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/settings" class="nav-link">
+          <img src="/static/assets/imgs/settings.png" class="icon-page" alt="">
+          <span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="feed">
+
+    <section class="profile-card">
+      <div class="profile-top">
+        <img id="profile-avatar" src="{{ avatar_url(user) }}" class="profile-avatar" alt="Avatar">
+
+        <div class="profile-meta">
+          <h2 class="profile-name">{{ user.username }}</h2>
+
+          <p class="profile-bio" id="profile-bio">
+            {% if user.bio %}
+              {{ user.bio }}
+            {% else %}
+              No bio yet.
+            {% endif %}
+          </p>
+
+          {% if user.id == session.user_id %}
+          <div class="profile-actions">
+            <button class="btn" type="button" id="edit-bio-btn">Edit Bio</button>
+            <button class="btn ghost-btn" type="button" id="change-avatar-btn">Change Avatar</button>
+            <input type="file" id="avatar-input" accept="image/*" hidden>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-num">{{ stats.posts }}</span>
+          <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ stats.media }}</span>
+          <span class="stat-label">Media</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ stats.reactions }}</span>
+          <span class="stat-label">Reactions</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ stats.friends }}</span>
+          <span class="stat-label">Friends</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="tabs">
+      {% if user.id == session.user_id %}
+        <a class="tab {% if tab == 'posts' %}active{% endif %}" href="/my_page?tab=posts">Posts</a>
+        <a class="tab {% if tab == 'info' %}active{% endif %}" href="/my_page?tab=info">Info</a>
+      {% else %}
+        <a class="tab {% if tab == 'posts' %}active{% endif %}" href="/{{ user.username }}?tab=posts">Posts</a>
+        <a class="tab {% if tab == 'info' %}active{% endif %}" href="/{{ user.username }}?tab=info">Info</a>
+      {% endif %}
+    </div>
+
+    {% if tab == "info" %}
+    <section class="profile-card info-card">
+      <div class="info-card-head">
+        <h3 class="info-title">About {{ user.username }}</h3>
+
+        {% if user.id == session.user_id %}
+        <button type="button" class="btn ghost-btn" id="edit-info-btn">Edit Info</button>
+        {% endif %}
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Birthday</span>
+          <span class="info-value">
+            {% if user.birthday %}
+              {{ datetime.strptime(user.birthday, '%Y-%m-%d').strftime('%m-%d-%y') }}
+            {% else %}
+              Not added
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Location</span>
+          <span class="info-value">
+            {% if user.location %}
+              {{ user.location }}
+            {% else %}
+              Not added
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Joined</span>
+          <span class="info-value">
+            {% if user.created_at %}
+              {{ user.created_at.strftime('%m-%d-%y') }}
+            {% else %}
+              Not available
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Bio</span>
+          <span class="info-value">
+            {% if user.bio %}
+              {{ user.bio }}
+            {% else %}
+              No bio yet.
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </section>
+    {% else %}
+    <div id="feed-posts">
+      {% for post in posts %}
+      <div class="post-card" data-post-id="{{ post.id }}">
+
+        <div class="post-header">
+          <a href="/{{ post.user.username }}" class="post-header-left post-user-link">
+            <img src="{{ avatar_url(post.user) }}" class="post-avatar" alt="Avatar">
+            <strong>{{ post.user.username }}</strong>
+          </a>
+
+          {% if post.user_id == session.user_id %}
+          <div class="post-actions">
+            <button type="button" class="post-action-btn edit-btn" data-post-id="{{ post.id }}" title="Edit">✏️</button>
+            <button type="button" class="post-action-btn delete-btn" data-post-id="{{ post.id }}" title="Delete">🗑️</button>
+          </div>
+          {% endif %}
+        </div>
+
+        <p class="post-content">{{ post.content }}</p>
+
+        {% if post.media|length > 1 %}
+        <div class="media-carousel">
+          <button class="carousel-btn prev" type="button">&#10094;</button>
+
+          <div class="carousel-track">
+            {% for m in post.media %}
+              {% if m.media_type == 'image' %}
+                <img
+                  src="{{ post_media_url(post.user, m.filename) }}"
+                  class="carousel-item"
+                  alt="Post media"
+                >
+              {% elif m.media_type == 'video' %}
+                <video
+                  src="{{ post_media_url(post.user, m.filename) }}"
+                  class="carousel-item"
+                  controls
+                ></video>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <button class="carousel-btn next" type="button">&#10095;</button>
+        </div>
+        {% else %}
+          {% for m in post.media %}
+            {% if m.media_type == 'image' %}
+              <img
+                src="{{ post_media_url(post.user, m.filename) }}"
+                class="post-media-img"
+                alt="Post media"
+              >
+            {% elif m.media_type == 'video' %}
+              <video
+                src="{{ post_media_url(post.user, m.filename) }}"
+                controls
+                class="post-media-video"
+              ></video>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <div class="post-reactions">
+          <div class="reaction-btn-container">
+            <button class="reaction-main-btn" type="button" data-post-id="{{ post.id }}">
+              {% set user_reaction = post.reactions|selectattr("user_id","equalto",session.user_id)|first %}
+              {% if user_reaction %}
+                <img
+                  src="/static/assets/emojis/{{ user_reaction.emoji }}.png"
+                  class="selected-emoji"
+                  alt="Reaction"
+                >
+              {% else %}
+                👍 Like
+              {% endif %}
+            </button>
+
+            <div class="reaction-popup">
+              {% for e in ['like','lol','mad','sad'] %}
+              <div class="reaction-item" data-reaction="{{ e }}">
+                <img src="/static/assets/emojis/{{ e }}.png" alt="{{ e }}">
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="reaction-counts">
+            {% set counts = {} %}
+            {% for r in post.reactions %}
+              {% set _ = counts.update({
+                r.emoji: (counts[r.emoji] if r.emoji in counts else 0) + 1
+              }) %}
+            {% endfor %}
+            {% for emoji, count in counts.items() %}
+              <span>{{ emoji|capitalize }}: {{ count }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="comment-section">
+          <div class="comments-list">
+            {% for comment in post.comments %}
+            <div class="comment">
+              <a href="/{{ comment.user.username }}" class="comment-user-link">
+                <strong>{{ comment.user.username }}</strong>
+              </a>
+              <span>{{ comment.content }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="comment-input">
+            <input type="text" class="comment-text" placeholder="Write a comment...">
+            <button class="btn post-comment-btn" type="button" data-post-id="{{ post.id }}">Post</button>
+          </div>
+        </div>
+
+      </div>
+      {% else %}
+      <div class="post-card">
+        <p class="post-content">No posts yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+
+<div id="image-modal" class="image-modal">
+  <span class="image-close">&times;</span>
+  <img class="image-modal-content" id="modal-img" alt="Preview">
+</div>
+
+<div id="delete-modal" class="frog-modal" hidden>
+  <div class="frog-modal-card">
+    <div class="frog-modal-title">Delete post?</div>
+    <div class="frog-modal-text">This will remove the post (and its media).</div>
+
+    <div class="frog-modal-actions">
+      <button type="button" class="btn ghost-btn" id="delete-cancel">Cancel</button>
+      <button type="button" class="btn danger-btn" id="delete-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-modal" class="frog-modal" hidden>
+  <div class="frog-modal-card wide">
+    <div class="frog-modal-header">
+      <div class="frog-modal-title">Edit Post</div>
+      <button type="button" class="frog-x" id="edit-close">×</button>
+    </div>
+
+    <textarea
+      id="edit-content"
+      class="frog-textarea"
+      rows="4"
+      placeholder="Update your post..."
+    ></textarea>
+
+    <div class="frog-subtitle">Media</div>
+    <div id="edit-existing-media" class="media-preview"></div>
+
+    <div class="post-options" style="margin-top:12px;">
+      <div class="left-tools">
+        <button type="button" class="plus-btn" id="edit-plus-btn" aria-label="Add">+</button>
+
+        <div id="edit-tray" class="post-tray" aria-hidden="true">
+          <button type="button" class="tray-item" id="edit-upload">📷 Upload media</button>
+          <button type="button" class="tray-item" id="edit-gif">🎞️ Add GIF</button>
+          <button type="button" class="tray-item" id="edit-link">🔗 Attach link</button>
+        </div>
+
+        <input type="file" id="edit-media-input" accept="image/*,video/*" multiple hidden>
+      </div>
+
+      <div class="right-tools">
+        <button type="button" class="btn ghost-btn" id="edit-cancel">Cancel</button>
+        <button type="button" class="btn" id="edit-save">Save</button>
+      </div>
+    </div>
+
+    <div id="edit-new-media" class="media-preview" hidden></div>
+  </div>
+</div>
+
+<div id="currentUserId" data-id="{{ session.user_id }}" hidden></div>
+
+<audio id="incomingCallRingtone" loop preload="auto">
+  <source src="/static/assets/sounds/incoming_call.mp3" type="audio/mpeg">
+</audio>
+
+<div class="incoming-call-popup" id="incomingCallPopup" hidden>
+  <div class="incoming-call-card">
+    <div class="incoming-call-left">
+      <img
+        id="incomingCallAvatar"
+        class="incoming-call-avatar"
+        src="/static/assets/imgs/avatar_placeholder.png"
+        alt="Caller"
+      >
+      <div class="incoming-call-text">
+        <div class="incoming-call-label">Incoming call</div>
+        <div class="incoming-call-name" id="incomingCallName">Someone</div>
+        <div class="incoming-call-type" id="incomingCallType">Audio call</div>
+      </div>
+    </div>
+
+    <div class="incoming-call-actions">
+      <button type="button" class="incoming-call-btn decline" id="declineIncomingCallBtn">Decline</button>
+      <button type="button" class="incoming-call-btn accept" id="acceptIncomingCallBtn">Accept</button>
+    </div>
+  </div>
+</div>
+
+<div class="call-modal" id="callModal">
+  <div class="call-card">
+    <div class="call-top">
+      <div class="call-person">
+        <div class="call-person-avatar-wrap">
+          <img
+            id="callAvatar"
+            class="call-person-avatar"
+            src="/static/assets/imgs/avatar_placeholder.png"
+            alt="Caller"
+          >
+          <span class="call-live-dot"></span>
+        </div>
+
+        <div class="call-person-text">
+          <h3 id="callTitle">Call</h3>
+          <div class="call-subtitle" id="callSubtitle">Connecting...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="call-stage">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+
+      <div class="call-stage-overlay">
+        <div class="call-status-pill" id="callStatus">Ready</div>
+      </div>
+    </div>
+
+    <div class="call-controls">
+      <button type="button" class="call-control-btn" id="toggleMuteBtn" title="Mute">🎤</button>
+      <button type="button" class="call-control-btn" id="toggleCamBtn" title="Camera">📷</button>
+      <button type="button" class="call-control-btn danger" id="hangupBottomBtn" title="Hang up">📞</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-info-modal" class="frog-modal" hidden>
+  <div class="frog-modal-card">
+    <div class="frog-modal-header">
+      <div class="frog-modal-title">Edit Info</div>
+      <button type="button" class="frog-x" id="edit-info-close">×</button>
+    </div>
+
+    <form id="edit-info-form">
+      <div class="story-field">
+        <label for="info-birthday">Birthday</label>
+        <input
+          type="date"
+          id="info-birthday"
+          name="birthday"
+          value="{{ user.birthday or '' }}"
+        >
+      </div>
+
+      <div class="story-field">
+        <label for="info-location">Location</label>
+        <input
+          type="text"
+          id="info-location"
+          name="location"
+          maxlength="120"
+          value="{{ user.location or '' }}"
+          placeholder="Enter your location"
+        >
+      </div>
+
+      <div class="frog-modal-actions" style="margin-top:16px;">
+        <button type="button" class="btn ghost-btn" id="edit-info-cancel">Cancel</button>
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+<script src="/static/notifications.js"></script>
+<script src="/static/messages.js"></script>
+</body>
+</html>

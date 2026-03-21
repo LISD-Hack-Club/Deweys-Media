@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deweys Media</title>
+
+  <script>
+    (() => {
+      const darkMode = localStorage.getItem("darkMode");
+      if (darkMode === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    })();
+  </script>
+  
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/notification.css">
+  <link rel="stylesheet" href="/static/messages.css">
+  <link rel="stylesheet" href="/static/settings.css">
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img src="/static/assets/imgs/logo.png" class="logo-img" alt="Logo">
+    Deweys Media
+  </a>
+
+  <input type="text" class="search-bar" placeholder="Search...">
+
+  <div class="header-right">
+    <button class="notif-btn" id="notif-btn" type="button" aria-label="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" hidden>0</span>
+    </button>
+
+    <div class="notif-pop" id="notif-pop" hidden>
+      <div class="notif-head">
+        <strong>Notifications</strong>
+        <button class="mini-clear" id="notif-clear" type="button">Mark read</button>
+      </div>
+
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <a href="/logout" class="user-pill">
+      <img class="header-avatar" src="{{ header_avatar }}" alt="Me">
+      {{ session.username }}
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <aside class="sidebar-left">
+    <ul>
+      <li>
+        <a href="/" class="nav-link">
+          <img src="/static/assets/imgs/home.png" class="icon-page" alt="">
+          <span>Home</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/my_page" class="nav-link">
+          <img src="/static/assets/imgs/mypage.png" class="icon-page" alt="">
+          <span>My Page</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/friends" class="nav-link">
+          <img src="/static/assets/imgs/friend.png" class="icon-page" alt="">
+          <span>Friends</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/events" class="nav-link">
+          <img src="/static/assets/imgs/events.png" class="icon-page" alt="">
+          <span>Events</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/messages" class="nav-link">
+          <img src="/static/assets/imgs/messages.png" class="icon-page" alt="">
+          <span>Messages</span>
+        </a>
+      </li>
+
+      <li class="active-page">
+        <a href="/settings" class="nav-link">
+          <img src="/static/assets/imgs/settings.png" class="icon-page" alt="">
+          <span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="feed">
+    <div class="settings-page-card">
+      <div class="settings-page-header">
+        <h1>Settings</h1>
+        <p>Manage your account, privacy, and app preferences.</p>
+      </div>
+
+      <div class="settings-layout">
+        <div class="settings-sidebar">
+          <button class="settings-tab" data-tab="security" type="button">Security</button>
+          <button class="settings-tab" data-tab="delete" type="button">Delete Account</button>
+          <button class="settings-tab" data-tab="feedback" type="button">Feedback</button>
+        </div>
+
+        <div class="settings-content">
+        <!-- PRIVACY -->
+        <section class="settings-panel" id="privacy">
+            <div class="settings-section-card">
+              <h2>Privacy</h2>
+
+              <div class="settings-form-group">
+                <label for="profileVisibility">Profile Visibility</label>
+                <select id="profileVisibility">
+                  <option value="everyone" {% if user.profile_visibility == "everyone" %}selected{% endif %}>Everyone</option>
+                  <option value="friends" {% if user.profile_visibility == "friends" %}selected{% endif %}>Friends Only</option>
+                  <option value="only_me" {% if user.profile_visibility == "only_me" %}selected{% endif %}>Only Me</option>
+                </select>
+              </div>
+
+              <div class="setting-row">
+                <div>
+                  <h3>Private Account</h3>
+                  <p>Only approved people can see your content.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="privateAccountToggle" {% if user.is_private_account %}checked{% endif %}>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <button class="btn" id="savePrivacyBtn" type="button">Save Privacy</button>
+            </div>
+          </section>
+
+          <!-- SECURITY -->
+          <section class="settings-panel" id="security">
+            <div class="settings-section-card">
+              <h2>Security</h2>
+
+              <div class="settings-form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Current password">
+              </div>
+
+              <div class="settings-form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="New password">
+              </div>
+
+              <div class="settings-form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+              </div>
+
+              <button class="btn" id="updatePasswordBtn" type="button">Update Password</button>
+            </div>
+          </section>
+
+          <!-- DELETE ACCOUNT -->
+          <section class="settings-panel" id="delete">
+            <div class="settings-section-card">
+              <h2>Delete Account</h2>
+              <p>Deleting your account will remove all your data and cannot be undone.</p>
+
+              <div class="settings-form-group">
+                <label for="deletePassword">Confirm Password</label>
+                <input type="password" id="deletePassword" placeholder="Enter your password">
+              </div>
+
+              <button class="btn btn-danger" id="deleteAccountBtn" type="button">Delete Account</button>
+            </div>
+          </section>
+
+          <!-- FEEDBACK -->
+          <section class="settings-panel" id="feedback">
+            <div class="settings-section-card">
+              <h2>Feedback</h2>
+              <p>We'd love to hear your thoughts and suggestions!</p>
+
+              <div class="settings-form-group">
+                <label for="feedbackText">Your Feedback</label>
+                <textarea id="feedbackText" rows="6" placeholder="Your feedback..."></textarea>
+              </div>
+
+              <button class="btn" id="submitFeedbackBtn" type="button">Submit Feedback</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="sidebar-right">
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Quick Settings</h3>
+      <p style="color: var(--muted); font-weight:800;">
+        Change your theme, account settings, privacy, and notifications here.
+      </p>
+    </div>
+  </aside>
+</div>
+
+<script src="/static/script.js"></script>
+<script src="/static/settings.js"></script>
+<script src="/static/notifications.js"></script>
+</body>
+</html>
