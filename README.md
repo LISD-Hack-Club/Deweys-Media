@@ -61,12 +61,6 @@ venv\Scripts\activate
 
 ---
 
-## Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
 ---
 
 ## Required Folders
@@ -239,72 +233,6 @@ sudo systemctl restart nginx
 ```bash
 sudo certbot --nginx -d yourdomain.com
 ```
-
----
-
-# 6. AUTO DEPLOY (GITHUB)
-
-## Deploy Script
-
-```bash
-nano /var/www/deweys-media/deploy.sh
-```
-
-```bash
-#!/bin/bash
-set -e
-
-cd /var/www/deweys-media
-
-git fetch origin
-git reset --hard origin/main
-
-source venv/bin/activate
-pip install -r requirements.txt
-
-sudo systemctl restart deweys-media
-```
-
-```bash
-chmod +x deploy.sh
-```
-
----
-
-## Flask Deploy Route
-
-```python
-import os, hmac, hashlib, subprocess
-from flask import request, abort
-
-DEPLOY_SECRET = os.environ.get("DEPLOY_SECRET")
-
-@app.route("/deploy", methods=["POST"])
-def deploy():
-    signature = request.headers.get("X-Hub-Signature-256")
-    body = request.get_data()
-
-    expected = "sha256=" + hmac.new(
-        DEPLOY_SECRET.encode(),
-        body,
-        hashlib.sha256
-    ).hexdigest()
-
-    if not hmac.compare_digest(signature, expected):
-        abort(403)
-
-    subprocess.Popen(["/var/www/deweys-media/deploy.sh"])
-    return {"status": "deploy started"}
-```
-
----
-
-## GitHub Webhook
-
-* URL: `https://yourdomain.com/deploy`
-* Content type: `application/json`
-* Secret: same as `DEPLOY_SECRET`
-* Event: **push**
 
 ---
 
