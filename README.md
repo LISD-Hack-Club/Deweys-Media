@@ -257,6 +257,6 @@ sudo nginx -t
 
 # DONE
 
-Your app is live at:
-
-https://yourdomain.com
+Your app will be live at:
+(Your domain)
+[https://deweys-media.deweyshosting.com:8081/]
