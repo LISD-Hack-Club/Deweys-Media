@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const storyViewerTime = document.getElementById("storyViewerTime");
   const storyViewerImg = document.getElementById("storyViewerImg");
   const storyViewerVideo = document.getElementById("storyViewerVideo");
+  const storyViewerBody = document.getElementById("storyViewerBody");
   const storyDeleteBtn = document.getElementById("storyDeleteBtn");
   const storyPrevBtn = document.getElementById("storyPrevBtn");
   const storyNextBtn = document.getElementById("storyNextBtn");
@@ -32,6 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const currentUserIdEl = document.getElementById("currentUserId");
   const currentUserId = Number(currentUserIdEl?.dataset?.id || 0);
+
+  if (!storiesRow || !storyViewer || !storyViewerBody) {
+    return;
+  }
 
   let storyGroups = [];
   let filteredStoryGroups = [];
@@ -73,6 +78,38 @@ document.addEventListener("DOMContentLoaded", () => {
     return d.toLocaleDateString();
   }
 
+  function normalizeStoryUrl(url, userId = null) {
+    if (!url) return "";
+
+    let clean = String(url).trim();
+    if (!clean) return "";
+
+    if (clean.startsWith("http://") || clean.startsWith("https://")) {
+      return clean;
+    }
+
+    if (clean.startsWith("/static/")) {
+      return clean;
+    }
+
+    if (clean.includes("/static/")) {
+      return clean.slice(clean.indexOf("/static/"));
+    }
+
+    if (clean.startsWith("static/")) {
+      return `/${clean}`;
+    }
+
+    if (!clean.startsWith("/")) {
+      if (userId) {
+        return `/static/story_uploads/${userId}/${clean}`;
+      }
+      return `/static/story_uploads/${clean}`;
+    }
+
+    return clean;
+  }
+
   function resetStoryPreview() {
     if (selectedStoryFileUrl) {
       URL.revokeObjectURL(selectedStoryFileUrl);
@@ -80,31 +117,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     selectedStoryFile = null;
-    storyUploadInput.value = "";
 
-    storyPreviewImg.hidden = true;
-    storyPreviewVideo.hidden = true;
-    storyPreviewImg.src = "";
-    storyPreviewVideo.src = "";
+    if (storyUploadInput) storyUploadInput.value = "";
 
-    storyPreviewText.hidden = false;
-    storyPreviewText.textContent = storyTextOverlayInput.value.trim() || "Your story preview";
-    storyPreviewText.style.background = storyBgColorInput.value || "#66c23a";
+    if (storyPreviewImg) {
+      storyPreviewImg.hidden = true;
+      storyPreviewImg.src = "";
+    }
 
-    storySelectedFileName.textContent = "No media selected";
+    if (storyPreviewVideo) {
+      storyPreviewVideo.hidden = true;
+      storyPreviewVideo.pause();
+      storyPreviewVideo.src = "";
+      storyPreviewVideo.load?.();
+    }
+
+    if (storyPreviewText) {
+      storyPreviewText.hidden = false;
+      storyPreviewText.textContent = storyTextOverlayInput?.value.trim() || "Text Preview";
+      storyPreviewText.style.background = storyBgColorInput?.value || "#66c23a";
+    }
+
+    if (storySelectedFileName) {
+      storySelectedFileName.textContent = "No media selected";
+    }
   }
 
   function updateStoryPreview() {
-    const overlayText = storyTextOverlayInput.value.trim();
-    const bgColor = storyBgColorInput.value || "#66c23a";
+    const overlayText = storyTextOverlayInput?.value.trim() || "";
+    const bgColor = storyBgColorInput?.value || "#66c23a";
 
-    storyPreviewText.textContent = overlayText || "Your story preview";
-    storyPreviewText.style.background = bgColor;
+    if (storyPreviewText) {
+      storyPreviewText.textContent = overlayText || "Text Preview";
+      storyPreviewText.style.background = bgColor;
+    }
 
     if (!selectedStoryFile) {
-      storyPreviewText.hidden = false;
-      storyPreviewImg.hidden = true;
-      storyPreviewVideo.hidden = true;
+      if (storyPreviewText) storyPreviewText.hidden = false;
+      if (storyPreviewImg) storyPreviewImg.hidden = true;
+      if (storyPreviewVideo) storyPreviewVideo.hidden = true;
       return;
     }
 
@@ -112,29 +163,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const isImage = selectedStoryFile.type.startsWith("image/");
 
     if (isImage) {
-      storyPreviewText.hidden = !overlayText;
-      storyPreviewImg.hidden = false;
-      storyPreviewVideo.hidden = true;
+      if (storyPreviewText) storyPreviewText.hidden = !overlayText;
+      if (storyPreviewImg) storyPreviewImg.hidden = false;
+      if (storyPreviewVideo) storyPreviewVideo.hidden = true;
     } else if (isVideo) {
-      storyPreviewText.hidden = !overlayText;
-      storyPreviewImg.hidden = true;
-      storyPreviewVideo.hidden = false;
+      if (storyPreviewText) storyPreviewText.hidden = !overlayText;
+      if (storyPreviewImg) storyPreviewImg.hidden = true;
+      if (storyPreviewVideo) storyPreviewVideo.hidden = false;
     }
   }
 
   function openStoryCreateModal() {
+    if (!storyCreateModal) return;
     storyCreateModal.hidden = false;
     document.body.classList.add("modal-open");
     updateStoryPreview();
   }
 
   function closeStoryCreateModal() {
+    if (!storyCreateModal) return;
     storyCreateModal.hidden = true;
     document.body.classList.remove("modal-open");
 
-    storyCaptionInput.value = "";
-    storyTextOverlayInput.value = "";
-    storyBgColorInput.value = "#66c23a";
+    if (storyCaptionInput) storyCaptionInput.value = "";
+    if (storyTextOverlayInput) storyTextOverlayInput.value = "";
+    if (storyBgColorInput) storyBgColorInput.value = "#66c23a";
+
     resetStoryPreview();
   }
 
@@ -187,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/api/stories");
       const data = await res.json();
 
-      if (!data.success) return;
+      if (!res.ok || !data.success) return;
 
       storyGroups = Array.isArray(data.stories) ? data.stories : [];
       filteredStoryGroups = getVisibleStoryGroups(storyGroups);
@@ -198,9 +252,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function publishStory() {
-    const caption = storyCaptionInput.value.trim();
-    const textOverlay = storyTextOverlayInput.value.trim();
-    const bgColor = storyBgColorInput.value || "#66c23a";
+    const caption = storyCaptionInput?.value.trim() || "";
+    const textOverlay = storyTextOverlayInput?.value.trim() || "";
+    const bgColor = storyBgColorInput?.value || "#66c23a";
 
     if (!selectedStoryFile && !caption && !textOverlay) {
       alert("Add a photo, video, caption, or text first.");
@@ -216,8 +270,10 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append("media", selectedStoryFile);
     }
 
-    storyPublishBtn.disabled = true;
-    storyPublishBtn.textContent = "Sharing...";
+    if (storyPublishBtn) {
+      storyPublishBtn.disabled = true;
+      storyPublishBtn.textContent = "Sharing...";
+    }
 
     try {
       const res = await fetch("/api/stories/create", {
@@ -238,17 +294,28 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
       alert("Something went wrong while creating the story.");
     } finally {
-      storyPublishBtn.disabled = false;
-      storyPublishBtn.textContent = "Share Story";
+      if (storyPublishBtn) {
+        storyPublishBtn.disabled = false;
+        storyPublishBtn.textContent = "Share Story";
+      }
     }
   }
 
   function clearViewerMedia() {
-    storyViewerImg.hidden = true;
-    storyViewerVideo.hidden = true;
-    storyViewerImg.src = "";
-    storyViewerVideo.pause();
-    storyViewerVideo.src = "";
+    if (storyViewerImg) {
+      storyViewerImg.hidden = true;
+      storyViewerImg.removeAttribute("src");
+      storyViewerImg.onerror = null;
+    }
+
+    if (storyViewerVideo) {
+      storyViewerVideo.hidden = true;
+      storyViewerVideo.pause();
+      storyViewerVideo.removeAttribute("src");
+      storyViewerVideo.onloadedmetadata = null;
+      storyViewerVideo.onended = null;
+      storyViewerVideo.load?.();
+    }
   }
 
   function stopStoryTimers() {
@@ -263,14 +330,22 @@ document.addEventListener("DOMContentLoaded", () => {
     progressPercent = 0;
   }
 
+  function removeTextSlide() {
+    const existing = document.getElementById("storyTextSlide");
+    if (existing) existing.remove();
+  }
+
   function closeStoryViewer() {
     stopStoryTimers();
     clearViewerMedia();
+    removeTextSlide();
     storyViewer.hidden = true;
     document.body.classList.remove("story-open");
   }
 
   function buildProgressBars(group) {
+    if (!storyProgressWrap) return;
+
     storyProgressWrap.innerHTML = "";
 
     (group.stories || []).forEach((_, idx) => {
@@ -280,12 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const inner = document.createElement("div");
       inner.className = "story-progress-bar";
       inner.dataset.index = String(idx);
-
-      if (idx < activeStoryIndex) {
-        inner.style.width = "100%";
-      } else {
-        inner.style.width = "0%";
-      }
+      inner.style.width = idx < activeStoryIndex ? "100%" : "0%";
 
       outer.appendChild(inner);
       storyProgressWrap.appendChild(outer);
@@ -293,6 +363,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateProgressBar(index, percent) {
+    if (!storyProgressWrap) return;
+
     const bar = storyProgressWrap.querySelector(`.story-progress-bar[data-index="${index}"]`);
     if (bar) {
       bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
@@ -316,8 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentStory.viewed = true;
     }
 
-    const allViewed = group.stories.every(s => s.viewed);
-    group.all_viewed = allViewed;
+    group.all_viewed = group.stories.every(s => s.viewed);
   }
 
   function advanceToNextStory() {
@@ -379,11 +450,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function startVideoStoryTimer() {
     stopStoryTimers();
 
-    const duration = storyViewerVideo.duration;
+    const duration = storyViewerVideo?.duration;
     if (!duration || !isFinite(duration)) {
-      storyViewerVideo.onloadedmetadata = () => {
-        startVideoStoryTimer();
-      };
+      if (storyViewerVideo) {
+        storyViewerVideo.onloadedmetadata = () => {
+          startVideoStoryTimer();
+        };
+      }
       return;
     }
 
@@ -404,6 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showTextStory(text, bgColor) {
     clearViewerMedia();
+    removeTextSlide();
 
     const textDiv = document.createElement("div");
     textDiv.className = "story-text-slide";
@@ -411,18 +485,20 @@ document.addEventListener("DOMContentLoaded", () => {
     textDiv.style.background = bgColor || "#66c23a";
     textDiv.textContent = text || "";
 
-    const existing = document.getElementById("storyTextSlide");
-    if (existing) existing.remove();
-
-    const body = document.getElementById("storyViewerBody");
-    body.appendChild(textDiv);
-
+    storyViewerBody.appendChild(textDiv);
     startImageStoryTimer();
   }
 
-  function removeTextSlide() {
-    const existing = document.getElementById("storyTextSlide");
-    if (existing) existing.remove();
+  function addOverlayText(text) {
+    if (!text) return;
+
+    removeTextSlide();
+
+    const overlay = document.createElement("div");
+    overlay.className = "story-overlay-text";
+    overlay.id = "storyTextSlide";
+    overlay.textContent = text;
+    storyViewerBody.appendChild(overlay);
   }
 
   async function showActiveStory() {
@@ -448,12 +524,20 @@ document.addEventListener("DOMContentLoaded", () => {
       updateProgressBar(i, 100);
     }
 
-    storyViewerAvatar.src = group.profile_pic || "/static/assets/imgs/avatar_placeholder.png";
-    storyViewerName.textContent = group.username || "User";
-    storyViewerTime.textContent = formatStoryTime(story.created_at);
+    if (storyViewerAvatar) {
+      storyViewerAvatar.src = group.profile_pic || "/static/assets/imgs/avatar_placeholder.png";
+    }
+    if (storyViewerName) {
+      storyViewerName.textContent = group.username || "User";
+    }
+    if (storyViewerTime) {
+      storyViewerTime.textContent = formatStoryTime(story.created_at);
+    }
 
-    storyDeleteBtn.hidden = !story.is_own;
-    storyDeleteBtn.dataset.storyId = String(story.id);
+    if (storyDeleteBtn) {
+      storyDeleteBtn.hidden = !story.is_own;
+      storyDeleteBtn.dataset.storyId = String(story.id);
+    }
 
     if (!story.is_own && !story.viewed) {
       await markStoryViewed(story.id);
@@ -462,35 +546,31 @@ document.addEventListener("DOMContentLoaded", () => {
       renderStoryCards();
     }
 
-    if (story.media_type === "image" && story.media_url) {
-      storyViewerImg.hidden = false;
-      storyViewerImg.src = story.media_url;
-      startImageStoryTimer();
+    const mediaUrl = normalizeStoryUrl(story.media_url, story.user_id);
 
-      if (story.text_overlay) {
-        const overlay = document.createElement("div");
-        overlay.className = "story-overlay-text";
-        overlay.id = "storyTextSlide";
-        overlay.textContent = story.text_overlay;
-        document.getElementById("storyViewerBody").appendChild(overlay);
-      }
+    if (story.media_type === "image" && mediaUrl) {
+      storyViewerImg.hidden = false;
+      storyViewerImg.src = mediaUrl;
+      storyViewerImg.onerror = () => {
+        console.error("Failed to load story image:", mediaUrl);
+        showTextStory(story.text_overlay || story.caption || "Story image failed to load.", story.bg_color || "#66c23a");
+      };
+      if (story.text_overlay) addOverlayText(story.text_overlay);
+      startImageStoryTimer();
       return;
     }
 
-    if (story.media_type === "video" && story.media_url) {
+    if (story.media_type === "video" && mediaUrl) {
       storyViewerVideo.hidden = false;
-      storyViewerVideo.src = story.media_url;
+      storyViewerVideo.src = mediaUrl;
       storyViewerVideo.currentTime = 0;
+      storyViewerVideo.onerror = () => {
+        console.error("Failed to load story video:", mediaUrl);
+        showTextStory(story.text_overlay || story.caption || "Story video failed to load.", story.bg_color || "#66c23a");
+      };
       storyViewerVideo.play().catch(() => {});
+      if (story.text_overlay) addOverlayText(story.text_overlay);
       startVideoStoryTimer();
-
-      if (story.text_overlay) {
-        const overlay = document.createElement("div");
-        overlay.className = "story-overlay-text";
-        overlay.id = "storyTextSlide";
-        overlay.textContent = story.text_overlay;
-        document.getElementById("storyViewerBody").appendChild(overlay);
-      }
       return;
     }
 
@@ -509,7 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function deleteCurrentStory() {
-    const storyId = Number(storyDeleteBtn.dataset.storyId || 0);
+    const storyId = Number(storyDeleteBtn?.dataset?.storyId || 0);
     if (!storyId) return;
 
     const ok = window.confirm("Delete this story?");
@@ -535,15 +615,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  addStoryBtn?.addEventListener("click", () => {
-    openStoryCreateModal();
-  });
-
+  addStoryBtn?.addEventListener("click", openStoryCreateModal);
   storyCreateClose?.addEventListener("click", closeStoryCreateModal);
   storyCreateCancel?.addEventListener("click", closeStoryCreateModal);
 
   storyChooseMediaBtn?.addEventListener("click", () => {
-    storyUploadInput.click();
+    storyUploadInput?.click();
   });
 
   storyClearMediaBtn?.addEventListener("click", () => {
@@ -556,7 +633,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!file) return;
 
     selectedStoryFile = file;
-    storySelectedFileName.textContent = file.name;
+    if (storySelectedFileName) {
+      storySelectedFileName.textContent = file.name;
+    }
 
     if (selectedStoryFileUrl) {
       URL.revokeObjectURL(selectedStoryFileUrl);
@@ -565,16 +644,24 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedStoryFileUrl = URL.createObjectURL(file);
 
     if (file.type.startsWith("image/")) {
-      storyPreviewImg.src = selectedStoryFileUrl;
-      storyPreviewImg.hidden = false;
-      storyPreviewVideo.hidden = true;
-      storyPreviewVideo.pause();
-      storyPreviewVideo.src = "";
+      if (storyPreviewImg) {
+        storyPreviewImg.src = selectedStoryFileUrl;
+        storyPreviewImg.hidden = false;
+      }
+      if (storyPreviewVideo) {
+        storyPreviewVideo.hidden = true;
+        storyPreviewVideo.pause();
+        storyPreviewVideo.src = "";
+      }
     } else if (file.type.startsWith("video/")) {
-      storyPreviewVideo.src = selectedStoryFileUrl;
-      storyPreviewVideo.hidden = false;
-      storyPreviewImg.hidden = true;
-      storyPreviewImg.src = "";
+      if (storyPreviewVideo) {
+        storyPreviewVideo.src = selectedStoryFileUrl;
+        storyPreviewVideo.hidden = false;
+      }
+      if (storyPreviewImg) {
+        storyPreviewImg.hidden = true;
+        storyPreviewImg.src = "";
+      }
     }
 
     updateStoryPreview();
@@ -582,7 +669,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   storyTextOverlayInput?.addEventListener("input", updateStoryPreview);
   storyBgColorInput?.addEventListener("input", updateStoryPreview);
-
   storyPublishBtn?.addEventListener("click", publishStory);
 
   storyCloseBtn?.addEventListener("click", closeStoryViewer);
