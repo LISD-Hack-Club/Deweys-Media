@@ -767,7 +767,7 @@ def save_story_file(file_obj, user_id):
     full_path = os.path.join(folder, unique_name)
     file_obj.save(full_path)
 
-    rel_path = "/" + full_path.replace("\\", "/")
+    rel_path = f"/static/story_uploads/{user_id}/{unique_name}"
     return rel_path, story_file_type(original_name)
 
 
