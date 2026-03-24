@@ -27,7 +27,7 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-producti
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL",
-    f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
+    "sqlite:////var/www/deweys-media/instance/database.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
